@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3 uid="uid://dgq7o512v2okp"]
+
+[ext_resource type="Script" uid="uid://dbb5ro2lm8mtx" path="res://scripts/block_highlight.gd" id="1_fg4tn"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aofvb"]
+albedo_color = Color(0.33440134, 0.20337048, 0.07728315, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ts78p"]
+material = SubResource("StandardMaterial3D_aofvb")
+size = Vector3(2, 2, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_u4n8i"]
+size = Vector3(2, 2, 2)
+
+[node name="Dirt" type="MeshInstance3D" node_paths=PackedStringArray("model", "area")]
+mesh = SubResource("BoxMesh_ts78p")
+script = ExtResource("1_fg4tn")
+model = NodePath(".")
+area = NodePath("Area3D")
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("BoxShape3D_u4n8i")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Area3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D/StaticBody3D"]
+shape = SubResource("BoxShape3D_u4n8i")

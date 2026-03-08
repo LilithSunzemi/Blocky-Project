@@ -1,0 +1,40 @@
+[gd_resource type="MeshLibrary" load_steps=9 format=3 uid="uid://cr7jouwkhgvmg"]
+
+[ext_resource type="Texture2D" uid="uid://crsmn20erpagx" path="res://Art/textures/test_grass_texture.png" id="1_ukv8t"]
+[ext_resource type="Texture2D" uid="uid://8ux223g604rt" path="res://resources/icons/Grass.png" id="2_eij13"]
+[ext_resource type="Texture2D" uid="uid://bos3fhywy50qy" path="res://resources/icons/Dirt.png" id="3_8pmu3"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_b5i5q"]
+albedo_color = Color(0.3613927, 0.5479472, 0.21254665, 1)
+albedo_texture = ExtResource("1_ukv8t")
+texture_filter = 0
+stencil_flags = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_eij13"]
+material = SubResource("StandardMaterial3D_b5i5q")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_u4n8i"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aofvb"]
+albedo_color = Color(0.33440134, 0.20337048, 0.07728315, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_agn3a"]
+material = SubResource("StandardMaterial3D_aofvb")
+
+[resource]
+item/0/name = "Grass"
+item/0/mesh = SubResource("BoxMesh_eij13")
+item/0/mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+item/0/mesh_cast_shadow = 1
+item/0/shapes = [SubResource("BoxShape3D_u4n8i"), Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)]
+item/0/navigation_mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+item/0/navigation_layers = 1
+item/0/preview = ExtResource("2_eij13")
+item/1/name = "Dirt"
+item/1/mesh = SubResource("BoxMesh_agn3a")
+item/1/mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+item/1/mesh_cast_shadow = 1
+item/1/shapes = [SubResource("BoxShape3D_u4n8i"), Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)]
+item/1/navigation_mesh_transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+item/1/navigation_layers = 1
+item/1/preview = ExtResource("3_8pmu3")

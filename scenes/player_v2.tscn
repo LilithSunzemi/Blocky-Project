@@ -1,0 +1,125 @@
+[gd_scene load_steps=15 format=3 uid="uid://dgvtqiayph52k"]
+
+[ext_resource type="PackedScene" uid="uid://bb72iksla7qx7" path="res://Art/models/female_body_finished.gltf" id="1_nu3eq"]
+[ext_resource type="Script" uid="uid://bvbb7dr1xlyrq" path="res://scripts/player_v2.gd" id="2_nu3eq"]
+[ext_resource type="Animation" uid="uid://b11ffmhif5onr" path="res://Art/animation/walking.res" id="3_8m7ld"]
+[ext_resource type="Script" uid="uid://dexp7wrrcg7bn" path="res://scripts/energy_bar.gd" id="4_1eehu"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_yq218"]
+radius = 0.9
+height = 3.223535
+
+[sub_resource type="Animation" id="Animation_1eehu"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:motion_mode")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_nu3eq"]
+resource_name = "idle"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:motion_mode")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_8m7ld"]
+_data = {
+&"RESET": SubResource("Animation_1eehu"),
+&"idle": SubResource("Animation_nu3eq")
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_d0msf"]
+_data = {
+&"walking": ExtResource("3_8m7ld")
+}
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_nu3eq"]
+animation = &"Blockbench_imported animations/walking"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_yq218"]
+animation = &"idle"
+
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_1eehu"]
+blend_point_0/node = SubResource("AnimationNodeAnimation_nu3eq")
+blend_point_0/pos = 1.0
+blend_point_1/node = SubResource("AnimationNodeAnimation_yq218")
+blend_point_1/pos = 0.0
+min_space = 0.0
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_8m7ld"]
+graph_offset = Vector2(-201.63635, 73.727234)
+nodes/BlendSpace1D/node = SubResource("AnimationNodeBlendSpace1D_1eehu")
+nodes/BlendSpace1D/position = Vector2(40, 180)
+node_connections = [&"output", 0, &"BlendSpace1D"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_d2s7x"]
+radius = 0.05
+height = 0.2
+
+[node name="Player_v2" type="Node3D"]
+
+[node name="blockbench_export" parent="." instance=ExtResource("1_nu3eq")]
+script = ExtResource("2_nu3eq")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="blockbench_export"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6121202, 0)
+shape = SubResource("CapsuleShape3D_yq218")
+
+[node name="AnimationPlayer2" type="AnimationPlayer" parent="blockbench_export"]
+libraries = {
+&"": SubResource("AnimationLibrary_8m7ld"),
+&"Blockbench_imported animations": SubResource("AnimationLibrary_d0msf")
+}
+
+[node name="AnimationTree" type="AnimationTree" parent="blockbench_export"]
+tree_root = SubResource("AnimationNodeBlendTree_8m7ld")
+anim_player = NodePath("../AnimationPlayer2")
+parameters/BlendSpace1D/blend_position = 0.0
+
+[node name="CameraPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.9902015, 0)
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.33424178)
+
+[node name="RayCast3D" type="RayCast3D" parent="CameraPivot/Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.75, 0, 0, -0.4729278)
+target_position = Vector3(0, 0, -8)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CameraPivot/Camera3D/RayCast3D"]
+transform = Transform3D(0.2, 0, 0, 0, -0.00024434004, 0.19999985, 0, -0.19999985, -0.00024434004, 0, 0, 0.03098011)
+mesh = SubResource("CapsuleMesh_d2s7x")
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
+spring_length = 2.0
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.846034, 0, 3.0765834)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="EnergyBar" type="ProgressBar" parent="CanvasLayer"]
+anchors_preset = -1
+anchor_right = 0.051171876
+anchor_bottom = 0.01875
+script = ExtResource("4_1eehu")
+player_path = NodePath("../../blockbench_export")
+metadata/_edit_use_anchors_ = true

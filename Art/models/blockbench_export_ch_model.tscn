@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://ba8thb0qd4cdg"]
+
+[ext_resource type="PackedScene" uid="uid://bb72iksla7qx7" path="res://Art/models/female_body_finished.gltf" id="1_ilawy"]
+
+[node name="blockbench_export" instance=ExtResource("1_ilawy")]
+
+[node name="AnimationPlayer2" type="AnimationPlayer" parent="." index="2"]
+
+[node name="AnimationPlayer3" type="AnimationPlayer" parent="." index="3"]
