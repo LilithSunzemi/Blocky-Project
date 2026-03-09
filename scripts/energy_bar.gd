@@ -6,8 +6,8 @@ extends ProgressBar
 
 
 func _ready() -> void:
-	set_max(100.0) 
-	set_value(100.0)
+	set_max(player.max_energy) 
+	set_value(player.current_energy)
 	player.energy_changed.connect(_on_energy_changed)
 
 

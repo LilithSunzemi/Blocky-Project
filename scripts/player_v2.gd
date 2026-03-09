@@ -2,17 +2,21 @@ extends CharacterBody3D
 
 #--- Constants ---
 const BASE_SPEED := 10.0
+const SPRINT_MULTIPLIER := 1.75
 const ROTATION_SPEED := 0.09
 const JUMP_VELOCITY := 10.0
 const CAMERA_PIVOT_HEIGHT := 3.0
 const CAMERA_PITCH_MIN := -45.0
 const CAMERA_PITCH_MAX := 70.0
+const STARVATION_DAMAGE_INTERVAL := 5.0
 const ANIM_BLEND_PATH := "parameters/BlendSpace1D/blend_position"
 
 #--- Exports--- Note: Incase I need it in future
 @export var max_energy: float = 100.0
-@export var energy_drain_rate: float = 2.0  # per second
+@export var energy_drain_rate: float = 20.0  # per second
 @export var starvation_damage: float = 5.0  # damage per second when starving
+@export var max_health: float = 100.0
+@export var max_stamina: float = 120.0
 
 #--- Node Refrences --- Note: All of there are nodes in player_v2 scene
 @onready var camera_pivot: Node3D = $"../CameraPivot"
@@ -25,13 +29,20 @@ const ANIM_BLEND_PATH := "parameters/BlendSpace1D/blend_position"
 var is_first_person := true
 var mouse_sensitivity := 0.002
 var speed := BASE_SPEED
+var sprint_cost: float = 10.0
 var selected: int = 0
 var direction := Vector3.ZERO
-var current_energy: float = 100.0
+var current_energy := max_energy
+var health := max_health
+var stamina := max_stamina
+var stamina_regen: float = 10.0
+var is_exhausted := false
+var starvation_damage_cooldown := 0.0
 
 
 signal energy_changed(new_value: float, max_value: float)
-
+signal health_changed(new_value: float, max_value: float)
+signal stamina_changed(new_value: float, max_value: float)
 
 func _ready() -> void: # Makes the mouse curser dissapered
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -55,8 +66,10 @@ func _physics_process(delta: float) -> void: # executes functions by physics or 
 	_apply_gravity(delta)
 	_handle_camera_pivot_follow()
 	_handle_body_rotation()
+	_handle_sprinting(delta)
 	_update_animation()
 	_drain_energy(delta)
+	_update_health()
 	move_and_slide()
 
 
@@ -118,7 +131,19 @@ func _handle_body_rotation() -> void: #This helps the player body rotate and wor
 		rotation.y = lerp_angle(rotation.y, target_angle, ROTATION_SPEED)
 
 
+func  _handle_sprinting(delta: float) -> void:
+	if Input.is_action_pressed("sprint") and not is_exhausted and stamina > 0:
+		speed = BASE_SPEED * SPRINT_MULTIPLIER
+		_drain_stamina(sprint_cost, delta)
+	else:
+		speed = BASE_SPEED
+		_regen_stamina(delta)
+
+
 func _handle_block_interaction() -> void: #Lets player place and destroy blocks
+	if not is_first_person:
+		return
+
 	if not ray_cast_3d.is_colliding():
 		return
 
@@ -135,19 +160,47 @@ func _handle_block_interaction() -> void: #Lets player place and destroy blocks
 			collider.place_block(place_pos, selected)
 
 
-func _drain_energy(delta: float) -> void: 
+func _update_health():
+	health = clamp(health, 0.0, max_health)
+	health_changed.emit(health, max_health)
+
+
+func _drain_stamina(amount: float, delta: float) -> void:
+	stamina -= amount * delta
+	stamina = clamp(stamina, 0.0, max_stamina)
+	stamina_changed.emit(stamina, max_stamina)
+	if stamina <= 0:
+		is_exhausted = true
+
+
+func _regen_stamina(delta: float) -> void:
+	if is_exhausted:
+		stamina += (stamina_regen * 0.5) * delta
+		stamina_changed.emit(stamina, max_stamina)
+	else:
+		stamina += stamina_regen * delta
+		stamina_changed.emit(stamina, max_stamina)
+	stamina = clamp(stamina, 0.0, max_stamina)
+	if is_exhausted and stamina >= max_stamina:
+		is_exhausted = false
+
+
+func _drain_energy(delta: float) -> void: # Drainds energy bar if player is moving
 	if direction != Vector3.ZERO:
 		current_energy -= energy_drain_rate * delta
 		current_energy = clamp(current_energy, 0.0, max_energy)
 		energy_changed.emit(current_energy, max_energy)
 	
-	if current_energy == 0.0:
+	if current_energy == 0.0: # gives consecuences of no energy
 		_take_starvation_damage(delta)
 
 
 func _take_starvation_damage(delta: float) -> void:
-	# Hook into your existing health system here
-	print("Starving! Taking damage: ", starvation_damage * delta)
+	if current_energy <= 0 and health > max_health * 0.5:
+		starvation_damage_cooldown -= delta
+		if starvation_damage_cooldown <= 0:
+			health -= starvation_damage
+			starvation_damage_cooldown = STARVATION_DAMAGE_INTERVAL
 
 
 func _update_animation() -> void: #lets the player model's animation know when player is moving to apply animations.
